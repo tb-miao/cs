@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄罗斯方块</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1b1b1b;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            margin: 0;
+            position: relative;
+        }
+        canvas {
+            border: 5px solid #333;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            background-color: #222;
+        }
+        h1 {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            width: 100%;
+            font-size: 2em;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        #score {
+            position: absolute;
+            top: 60px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>俄罗斯方块</h1>
+    <div id="score">得分: 0</div>
+    <canvas id="tetris" width="240" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("tetris");
+        const context = canvas.getContext("2d");
+        context.scale(20, 20);
+
+        const BOARD_WIDTH = 10;
+        const BOARD_HEIGHT = 20;
+        const PIECES = [
+            [[1, 1, 1, 1]],  // I
+            [[1, 1, 1], [0, 0, 1]],  // J
+            [[1, 1], [1, 1]],  // O
+            [[0, 1, 1], [1, 1, 0]],  // Z
+            [[1, 1, 0], [0, 1, 1]],  // S
+            [[0, 1, 0], [1, 1, 1]],  // T
+            [[1, 1, 1], [1, 0, 0]],  // L
+        ];
+        let board = Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(0));
+        let currentPiece, pos;
+        let score = 0;
+        let gameInterval;
+        let isPaused = false;
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            board.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        context.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                        context.fillRect(x, y, 1, 1);
+                        context.strokeStyle = '#fff';
+                        context.strokeRect(x, y, 1, 1);
+                    }
+                });
+            });
+            currentPiece.shape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        context.fillStyle = 'rgba(0, 0, 255, 0.7)';
+                        context.fillRect(pos.x + x, pos.y + y, 1, 1);
+                        context.strokeStyle = '#fff';
+                        context.strokeRect(pos.x + x, pos.y + y, 1, 1);
+                    }
+                });
+            });
+            document.getElementById("score").innerText = `得分: ${score}`;
+        }
+
+        function merge() {
+            currentPiece.shape.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value) {
+                        board[pos.y + y][pos.x + x] = value;
+                    }
+                });
+            });
+            clearLines();
+        }
+
+        function clearLines() {
+            for (let y = board.length - 1; y >= 0; y--) {
+                if (board[y].every(value => value !== 0)) {
+                    board.splice(y, 1);
+                    board.unshift(Array(BOARD_WIDTH).fill(0));
+                    score += 100; // 每消除一行加100分
+                }
+            }
+        }
+
+        function collide() {
+            return currentPiece.shape.some((row, y) => {
+                return row.some((value, x) => {
+                    return value && (board[pos.y + y] && board[pos.y + y][pos.x + x]) !== 0;
+                });
+            });
+        }
+
+        function rotate(piece) {
+            let newShape = piece.shape[0].map((val, index) =>
+                piece.shape.map(row => row[index]).reverse()
+            );
+            piece.shape = newShape;
+        }
+
+        function resetGame() {
+            board = Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(0));
+            score = 0;
+            document.getElementById("score").innerText = `得分: ${score}`;
+            spawnPiece();
+        }
+
+        function spawnPiece() {
+            currentPiece = {
+                shape: PIECES[Math.floor(Math.random() * PIECES.length)],
+            };
+            pos = { x: 3, y: 0 };
+            if (collide()) {
+                clearInterval(gameInterval);
+                alert("游戏结束!");
+            }
+        }
+
+        function drop() {
+            if (!isPaused) {
+                pos.y++;
+                if (collide()) {
+                    pos.y--;
+                    merge();
+                    spawnPiece();
+                }
+                draw();
+            }
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (isPaused) return;
+            if (event.key === "ArrowLeft") {
+                pos.x--;
+                if (collide()) pos.x++;
+            } else if (event.key === "ArrowRight") {
+                pos.x++;
+                if (collide()) pos.x--;
+            } else if (event.key === "ArrowDown") {
+                drop();
+            } else if (event.key === "ArrowUp") {
+                rotate(currentPiece);
+                if (collide()) {
+                    rotate(currentPiece); // 旋转回去
+                }
+            } else if (event.key === "p") {
+                togglePause();
+            }
+            draw();
+        });
+
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                clearInterval(gameInterval);
+                alert("游戏暂停");
+            } else {
+                gameInterval = setInterval(drop, 1000);
+            }
+        }
+
+        resetGame();
+        gameInterval = setInterval(drop, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(to right, #74ebd5, #9face6);
+            margin: 0;
+            overflow: hidden;
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInUp 0.5s forwards; /* 添加动画 */
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            animation: slideIn 0.5s forwards; /* 给标题添加动画 */
+            opacity: 0;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s, transform 0.3s; /* 添加变换动画 */
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        input[type="password"]:focus {
+            border-color: #007bff;
+            outline: none;
+            transform: scale(1.02); /* 聚焦时放大 */
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s; /* 添加变换动画 */
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05); /* 悬停时放大 */
+        }
+        #message {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            animation: fadeIn 0.5s forwards; /* 给消息添加动画 */
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>登录</h2>
+        <form onsubmit="return validatePassword()">
+            <input type="password" id="password" placeholder="请输入密码" required>
+            <button type="submit">登录</button>
+            <p>密码获取方式：加Q：2307057760</p>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const correctPassword = '123456'; // 设定的正确密码
+
+            if (password === correctPassword) {
+                // 密码正确，跳转到指定网站
+                window.location.href = 'https://tbmiao.zeabur.app'; // 替换为你要跳转的网址
+                return false; // 阻止表单提交
+            } else {
+                document.getElementById('message').innerText = '密码错误，请重试。';
+                document.getElementById('message').style.opacity = 1; // 设置消息显示
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>
